@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 默认颜色 -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- 主题色 -->
+    <color name="blue_primary">#1140b6</color>
+    <color name="blue_primary_variant">#0D2F8A</color>
+    <color name="blue_secondary">#2196F3</color>
+    
+    <color name="red_primary">#ab3b2d</color>
+    <color name="red_primary_variant">#8B2F24</color>
+    <color name="red_secondary">#FF5252</color>
+    
+    <color name="pink_primary">#fe578d</color>
+    <color name="pink_primary_variant">#E91E63</color>
+    <color name="pink_secondary">#FF80AB</color>
+    
+    <color name="purple_primary">#bd90e8</color>
+    <color name="purple_primary_variant">#9C27B0</color>
+    <color name="purple_secondary">#E1BEE7</color>
+    
+    <color name="yellow_primary">#eca113</color>
+    <color name="yellow_primary_variant">#F57C00</color>
+    <color name="yellow_secondary">#FFD54F</color>
+    
+    <color name="green_primary">#0dae68</color>
+    <color name="green_primary_variant">#388E3C</color>
+    <color name="green_secondary">#81C784</color>
+    
+    <color name="cyan_primary">#33bfb6</color>
+    <color name="cyan_primary_variant">#00796B</color>
+    <color name="cyan_secondary">#80CBC4</color>
+    
+    <!-- 通用颜色 -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="card_background_dark">#1E1E1E</color>
+    <color name="surface_variant">#E0E0E0</color>
+    <color name="surface_variant_dark">#424242</color>
+    
+    <!-- 系统栏颜色 -->
+    <color name="status_bar_color">@android:color/transparent</color>
+    <color name="navigation_bar_color">@android:color/transparent</color>
+    
+    <!-- 底部导航栏颜色 -->
+    <color name="bottom_nav_bg">#FFFFFF</color>
+    <color name="bottom_nav_bg_dark">#1E1E1E</color>
+    <color name="bottom_nav_inactive">#757575</color>
+    <color name="bottom_nav_inactive_dark">#AAAAAA</color>
+</resources>

@@ -1,0 +1,66 @@
+<resources>
+    <string name="app_name">GoodSticks</string>
+    <string name="app_slogan">记录美好，随手可得</string>
+    
+    <!-- 登录相关 -->
+    <string name="welcome_back">欢迎回来</string>
+    <string name="login_subtitle">请登录以继续使用</string>
+    <string name="username">用户名</string>
+    <string name="password">密码</string>
+    <string name="remember_password">记住密码</string>
+    <string name="login">登录</string>
+    <string name="no_account_register">还没有账号？点击注册</string>
+    <string name="error_field_required">此字段不能为空</string>
+    <string name="error_invalid_password">密码长度至少6位</string>
+    <string name="error_incorrect_password">用户名或密码错误</string>
+    
+    <!-- 导航相关 -->
+    <string name="navigation_home">首页</string>
+    <string name="navigation_settings">设置</string>
+    
+    <!-- 首页相关 -->
+    <string name="search_notes">搜索笔记</string>
+    <string name="no_notes">暂无笔记</string>
+    <string name="tap_to_create">点击右下角按钮创建笔记</string>
+    <string name="new_note">新建笔记</string>
+    
+    <!-- 编辑笔记相关 -->
+    <string name="edit_note">编辑笔记</string>
+    <string name="note_title_hint">标题</string>
+    <string name="note_content_hint">在这里记录...</string>
+    <string name="note_empty_warning">请输入标题或内容</string>
+    <string name="note_saved">保存成功</string>
+    <string name="delete_note">删除笔记</string>
+    <string name="delete_note_confirm">确定要删除这条笔记吗？</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="save">保存</string>
+    
+    <!-- 相机相关 -->
+    <string name="add_image">添加图片</string>
+    <string name="take_photo">拍照</string>
+    <string name="choose_from_gallery">从相册选择</string>
+    <string name="camera_permission_denied">需要相机权限才能拍照</string>
+    <string name="storage_permission_denied">需要存储权限才能选择图片</string>
+    <string name="error_create_image_file">创建图片文件失败</string>
+    
+    <!-- 设置相关 -->
+    <string name="appearance">外观</string>
+    <string name="dark_mode">深色模式</string>
+    <string name="theme_color">主题颜色</string>
+    <string name="select_theme_color">选择主题颜色</string>
+    <string name="about_info">关于</string>
+    <string name="about">关于应用</string>
+    <string name="about_message">GoodSticks 备忘录\n版本 1.0\n\n一个简洁优雅的备忘录应用，帮助您记录生活中的美好时刻。</string>
+    <string name="logout">退出登录</string>
+    <string name="logout_confirm_message">确定要退出登录吗？</string>
+    <string name="confirm">确定</string>
+    <string name="ok">确定</string>
+    <string name="click_to_edit">点击编辑资料</string>
+    <string name="edit_profile">编辑资料</string>
+    <string name="change_avatar">更换头像</string>
+    <string name="avatar_updated">头像已更新</string>
+    <string name="profile_updated">资料已更新</string>
+    <string name="theme_changed">主题已更改</string>
+    <string name="theme_change_notice">主题将在下次启动应用时生效</string>
+</resources>

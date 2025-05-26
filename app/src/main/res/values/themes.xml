@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.GoodSticks" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/status_bar_color</item>
+        <item name="android:navigationBarColor">@color/navigation_bar_color</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
+    <!-- Blue Theme -->
+    <style name="Theme.GoodSticks" parent="Base.Theme.GoodSticks">
+        <item name="colorPrimary">@color/blue_primary</item>
+        <item name="colorPrimaryVariant">@color/blue_primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/blue_secondary</item>
+        <item name="colorSecondaryVariant">@color/blue_primary_variant</item>
+        <item name="colorOnSecondary">@color/white</item>
+    </style>
+
+    <style name="Theme.GoodSticks.Blue" parent="Theme.GoodSticks" />
+
+    <!-- Red Theme -->
+    <style name="Theme.GoodSticks.Red" parent="Base.Theme.GoodSticks">
+        <item name="colorPrimary">@color/red_primary</item>
+        <item name="colorPrimaryVariant">@color/red_primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/red_secondary</item>
+        <item name="colorSecondaryVariant">@color/red_primary_variant</item>
+        <item name="colorOnSecondary">@color/white</item>
+    </style>
+
+    <!-- Pink Theme -->
+    <style name="Theme.GoodSticks.Pink" parent="Base.Theme.GoodSticks">
+        <item name="colorPrimary">@color/pink_primary</item>
+        <item name="colorPrimaryVariant">@color/pink_primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/pink_secondary</item>
+        <item name="colorSecondaryVariant">@color/pink_primary_variant</item>
+        <item name="colorOnSecondary">@color/black</item>
+    </style>
+
+    <!-- Purple Theme -->
+    <style name="Theme.GoodSticks.Purple" parent="Base.Theme.GoodSticks">
+        <item name="colorPrimary">@color/purple_primary</item>
+        <item name="colorPrimaryVariant">@color/purple_primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/purple_secondary</item>
+        <item name="colorSecondaryVariant">@color/purple_primary_variant</item>
+        <item name="colorOnSecondary">@color/black</item>
+    </style>
+
+    <!-- Yellow Theme -->
+    <style name="Theme.GoodSticks.Yellow" parent="Base.Theme.GoodSticks">
+        <item name="colorPrimary">@color/yellow_primary</item>
+        <item name="colorPrimaryVariant">@color/yellow_primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/yellow_secondary</item>
+        <item name="colorSecondaryVariant">@color/yellow_primary_variant</item>
+        <item name="colorOnSecondary">@color/black</item>
+    </style>
+
+    <!-- Green Theme -->
+    <style name="Theme.GoodSticks.Green" parent="Base.Theme.GoodSticks">
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorPrimaryVariant">@color/green_primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/green_secondary</item>
+        <item name="colorSecondaryVariant">@color/green_primary_variant</item>
+        <item name="colorOnSecondary">@color/black</item>
+    </style>
+
+    <!-- Cyan Theme -->
+    <style name="Theme.GoodSticks.Cyan" parent="Base.Theme.GoodSticks">
+        <item name="colorPrimary">@color/cyan_primary</item>
+        <item name="colorPrimaryVariant">@color/cyan_primary_variant</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/cyan_secondary</item>
+        <item name="colorSecondaryVariant">@color/cyan_primary_variant</item>
+        <item name="colorOnSecondary">@color/black</item>
+    </style>
+
+    <!-- Splash Theme -->
+    <style name="Theme.GoodSticks.Splash" parent="Theme.GoodSticks">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">?attr/colorPrimary</item>
+    </style>
+
+    <!-- AppBar Theme -->
+    <style name="Theme.GoodSticks.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.GoodSticks.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+</resources>

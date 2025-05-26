@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 圆形背景 -->
+    <path
+        android:fillColor="?attr/colorError"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2z" />
+    <!-- 垃圾桶图标 -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M6,19C6,20.1 6.9,21 8,21H16C17.1,21 18,20.1 18,19V7H6V19zM19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4z"
+        android:scaleX="0.7"
+        android:scaleY="0.7"
+        android:translateX="3.6"
+        android:translateY="3.6" />
+</vector> 
