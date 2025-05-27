@@ -19,6 +19,7 @@ import cn.younglee.goodsticks.R;
 import cn.younglee.goodsticks.data.entity.User;
 import cn.younglee.goodsticks.data.repository.UserRepository;
 import cn.younglee.goodsticks.databinding.ActivityLoginBinding;
+import cn.younglee.goodsticks.utils.DataMigrationUtil;
 import cn.younglee.goodsticks.utils.ThemeUtils;
 
 public class LoginActivity extends AppCompatActivity {
@@ -140,6 +141,9 @@ public class LoginActivity extends AppCompatActivity {
                         editor.remove("password");
                     }
                     editor.apply();
+                    
+                    // 执行数据迁移，将现有笔记关联到当前用户
+                    DataMigrationUtil.migrateNotesToCurrentUser(this);
                     
                     // 跳转到主页
                     Intent intent = new Intent(this, MainActivity.class);

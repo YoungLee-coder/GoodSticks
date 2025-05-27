@@ -11,6 +11,7 @@ import androidx.security.crypto.MasterKey;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import cn.younglee.goodsticks.utils.DataMigrationUtil;
 import cn.younglee.goodsticks.utils.ThemeUtils;
 
 public class GoodSticksApplication extends Application {
@@ -29,6 +30,9 @@ public class GoodSticksApplication extends Application {
         // 强制使用浅色模式
         sharedPreferences.edit().putBoolean("dark_mode", false).apply();
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        
+        // 执行数据迁移
+        DataMigrationUtil.migrateNotesToCurrentUser(this);
     }
     
     private void initEncryptedSharedPreferences() {

@@ -28,11 +28,17 @@ public interface NoteDao {
     @Query("SELECT * FROM notes ORDER BY is_pinned DESC, modified_date DESC")
     LiveData<List<Note>> getAllNotes();
     
+    @Query("SELECT * FROM notes WHERE user_id = :userId ORDER BY is_pinned DESC, modified_date DESC")
+    LiveData<List<Note>> getNotesByUserId(long userId);
+    
     @Query("SELECT * FROM notes WHERE id = :id")
     LiveData<Note> getNoteById(long id);
     
     @Query("SELECT * FROM notes WHERE title LIKE '%' || :searchQuery || '%' OR content LIKE '%' || :searchQuery || '%' ORDER BY is_pinned DESC, modified_date DESC")
     LiveData<List<Note>> searchNotes(String searchQuery);
+    
+    @Query("SELECT * FROM notes WHERE user_id = :userId AND (title LIKE '%' || :searchQuery || '%' OR content LIKE '%' || :searchQuery || '%') ORDER BY is_pinned DESC, modified_date DESC")
+    LiveData<List<Note>> searchNotesByUserId(long userId, String searchQuery);
     
     @Query("UPDATE notes SET is_pinned = :isPinned WHERE id = :id")
     void updatePinStatus(long id, boolean isPinned);

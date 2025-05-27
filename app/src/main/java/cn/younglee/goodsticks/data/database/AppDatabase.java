@@ -7,6 +7,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
+import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import java.util.concurrent.ExecutorService;
@@ -18,7 +19,7 @@ import cn.younglee.goodsticks.data.dao.UserDao;
 import cn.younglee.goodsticks.data.entity.Note;
 import cn.younglee.goodsticks.data.entity.User;
 
-@Database(entities = {Note.class, User.class}, version = 1, exportSchema = false)
+@Database(entities = {Note.class, User.class}, version = 2, exportSchema = false)
 @TypeConverters({DateConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
     
@@ -30,13 +31,22 @@ public abstract class AppDatabase extends RoomDatabase {
     public static final ExecutorService databaseWriteExecutor =
             Executors.newFixedThreadPool(NUMBER_OF_THREADS);
     
+    // 数据库迁移策略 - 从版本1到版本2
+    static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            // 添加user_id列，默认值为-1（表示未关联用户）
+            database.execSQL("ALTER TABLE notes ADD COLUMN user_id INTEGER NOT NULL DEFAULT -1");
+        }
+    };
+    
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             AppDatabase.class, "goodsticks_database")
-                            .fallbackToDestructiveMigration()
+                            .addMigrations(MIGRATION_1_2) // 使用迁移策略，而不是破坏性重建
                             .addCallback(sRoomDatabaseCallback)
                             .build();
                 }
@@ -61,6 +71,12 @@ public abstract class AppDatabase extends RoomDatabase {
                     userDao.insert(admin);
                 }
             });
+        }
+        
+        @Override
+        public void onOpen(@NonNull SupportSQLiteDatabase db) {
+            super.onOpen(db);
+            // 数据库打开时执行的操作
         }
     };
 } 

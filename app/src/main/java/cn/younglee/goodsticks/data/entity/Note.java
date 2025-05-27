@@ -32,6 +32,9 @@ public class Note {
     @ColumnInfo(name = "color")
     private int color;
     
+    @ColumnInfo(name = "user_id")
+    private long userId;
+    
     // 构造函数
     public Note() {
         this.createdDate = new Date();
@@ -103,5 +106,13 @@ public class Note {
     
     public void setColor(int color) {
         this.color = color;
+    }
+    
+    public long getUserId() {
+        return userId;
+    }
+    
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 } 
