@@ -90,4 +90,10 @@
     <!-- AppBar Theme -->
     <style name="Theme.GoodSticks.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="Theme.GoodSticks.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    
+    <!-- 自定义形状外观 -->
+    <style name="ShapeAppearance.App.SmallComponent" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
 </resources>
