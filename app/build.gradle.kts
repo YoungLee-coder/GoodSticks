@@ -68,6 +68,12 @@ dependencies {
     // Security for SharedPreferences
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     
+    // WebDAV Client
+    implementation("com.github.thegrizzlylabs:sardine-android:0.8")
+    
+    // Gson for JSON processing
+    implementation("com.google.code.gson:gson:2.10.1")
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -78,6 +78,61 @@ public class UserRepository {
     }
     
     /**
+     * 同步方式根据ID获取用户信息
+     * @param userId 用户ID
+     * @return 用户信息对象
+     */
+    public User getUserByIdSync(long userId) {
+        try {
+            return CompletableFuture.supplyAsync(() -> 
+                userDao.getUserByIdSync(userId), executor).get();
+        } catch (ExecutionException | InterruptedException e) {
+            return null;
+        }
+    }
+    
+    /**
+     * 同步方式根据用户名获取用户ID
+     * @param username 用户名
+     * @return 用户ID，不存在返回0
+     */
+    public long getUserIdByUsernameSync(String username) {
+        try {
+            return CompletableFuture.supplyAsync(() -> 
+                userDao.getUserIdByUsername(username), executor).get();
+        } catch (ExecutionException | InterruptedException e) {
+            return 0;
+        }
+    }
+    
+    /**
+     * 同步方式插入用户
+     * @param user 用户对象
+     * @return 插入的用户ID
+     */
+    public long insertUserSync(User user) {
+        try {
+            return CompletableFuture.supplyAsync(() -> 
+                userDao.insert(user), executor).get();
+        } catch (ExecutionException | InterruptedException e) {
+            return 0;
+        }
+    }
+    
+    /**
+     * 同步方式更新用户
+     * @param user 用户对象
+     */
+    public void updateUserSync(User user) {
+        try {
+            CompletableFuture.runAsync(() -> 
+                userDao.update(user), executor).get();
+        } catch (ExecutionException | InterruptedException e) {
+            // 处理异常
+        }
+    }
+    
+    /**
      * 更新用户信息
      * @param user 用户对象
      */

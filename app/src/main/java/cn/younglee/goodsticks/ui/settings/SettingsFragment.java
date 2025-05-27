@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -29,11 +31,21 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +56,7 @@ import cn.younglee.goodsticks.data.repository.UserRepository;
 import cn.younglee.goodsticks.databinding.FragmentSettingsBinding;
 import cn.younglee.goodsticks.ui.auth.LoginActivity;
 import cn.younglee.goodsticks.utils.ThemeUtils;
+import cn.younglee.goodsticks.utils.WebDavUtils;
 
 public class SettingsFragment extends Fragment {
     
@@ -54,6 +67,7 @@ public class SettingsFragment extends Fragment {
     private long currentUserId;
     private UserRepository userRepository;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private BackupFileAdapter backupFileAdapter;
     
     // 拍照启动器
     private final ActivityResultLauncher<Uri> takePictureLauncher = registerForActivityResult(
@@ -120,6 +134,15 @@ public class SettingsFragment extends Fragment {
         // 主题色选择
         binding.layoutThemeColor.setOnClickListener(v -> showThemeColorDialog());
         
+        // WebDAV设置
+        binding.cardWebdavSettings.setOnClickListener(v -> showWebDavSettingsDialog());
+        
+        // 备份
+        binding.cardBackup.setOnClickListener(v -> createBackup());
+        
+        // 恢复
+        binding.cardRestore.setOnClickListener(v -> showBackupFilesDialog());
+        
         // 关于
         binding.layoutAbout.setOnClickListener(v -> showAboutDialog());
         
@@ -132,6 +155,23 @@ public class SettingsFragment extends Fragment {
         ThemeUtils.Theme currentTheme = ThemeUtils.getCurrentTheme();
         binding.tvCurrentTheme.setText(currentTheme.getName());
         binding.viewThemeColor.setBackgroundColor(currentTheme.getColorInt());
+        
+        // 加载WebDAV状态
+        WebDavUtils.WebDavSettings webDavSettings = WebDavUtils.getWebDavSettings(requireContext());
+        if (webDavSettings.isEnabled() && !webDavSettings.getUrl().isEmpty()) {
+            binding.tvWebdavStatus.setText(R.string.configured);
+            
+            // 显示最近备份时间
+            String lastBackup = webDavSettings.getLastBackup();
+            if (!TextUtils.isEmpty(lastBackup)) {
+                binding.tvLastBackupTime.setText(getString(R.string.last_backup, lastBackup));
+            } else {
+                binding.tvLastBackupTime.setText(R.string.never_backed_up);
+            }
+        } else {
+            binding.tvWebdavStatus.setText(R.string.not_configured);
+            binding.tvLastBackupTime.setText(R.string.never_backed_up);
+        }
     }
     
     private void showThemeColorDialog() {
@@ -349,10 +389,316 @@ public class SettingsFragment extends Fragment {
         }
     }
     
+    /**
+     * 显示WebDAV设置对话框
+     */
+    private void showWebDavSettingsDialog() {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_webdav_settings, null);
+        
+        SwitchMaterial switchEnable = dialogView.findViewById(R.id.switch_enable_webdav);
+        TextInputEditText etUrl = dialogView.findViewById(R.id.et_webdav_url);
+        TextInputEditText etUsername = dialogView.findViewById(R.id.et_webdav_username);
+        TextInputEditText etPassword = dialogView.findViewById(R.id.et_webdav_password);
+        TextInputEditText etFolder = dialogView.findViewById(R.id.et_webdav_folder);
+        
+        // 加载当前设置
+        WebDavUtils.WebDavSettings settings = WebDavUtils.getWebDavSettings(requireContext());
+        switchEnable.setChecked(settings.isEnabled());
+        etUrl.setText(settings.getUrl());
+        etUsername.setText(settings.getUsername());
+        etPassword.setText(settings.getPassword());
+        etFolder.setText(settings.getFolder());
+        
+        // 测试连接按钮
+        dialogView.findViewById(R.id.btn_test_connection).setOnClickListener(v -> {
+            String url = etUrl.getText().toString().trim();
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+            
+            if (TextUtils.isEmpty(url)) {
+                Toast.makeText(requireContext(), R.string.error_field_required, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // 显示加载提示
+            Toast.makeText(requireContext(), R.string.connection_successful, Toast.LENGTH_SHORT).show();
+            
+            // 测试连接
+            WebDavUtils.testConnection(url, username, password).thenAccept(result -> {
+                requireActivity().runOnUiThread(() -> {
+                    if (result) {
+                        Toast.makeText(requireContext(), R.string.connection_successful, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), R.string.connection_failed, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+        });
+        
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.webdav_settings)
+                .setView(dialogView)
+                .setPositiveButton(R.string.save, null)
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        
+        dialog.setOnShowListener(d -> {
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+                // 保存设置
+                String url = etUrl.getText().toString().trim();
+                String username = etUsername.getText().toString().trim();
+                String password = etPassword.getText().toString().trim();
+                String folder = etFolder.getText().toString().trim();
+                boolean enabled = switchEnable.isChecked();
+                
+                if (enabled && TextUtils.isEmpty(url)) {
+                    Toast.makeText(requireContext(), R.string.error_field_required, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                WebDavUtils.saveWebDavSettings(requireContext(), url, username, password, folder, enabled);
+                
+                // 更新UI
+                if (enabled && !url.isEmpty()) {
+                    binding.tvWebdavStatus.setText(R.string.configured);
+                } else {
+                    binding.tvWebdavStatus.setText(R.string.not_configured);
+                }
+                
+                dialog.dismiss();
+            });
+        });
+        
+        dialog.show();
+    }
+    
+    /**
+     * 创建WebDAV备份
+     */
+    private void createBackup() {
+        // 检查WebDAV是否已配置
+        WebDavUtils.WebDavSettings settings = WebDavUtils.getWebDavSettings(requireContext());
+        if (!settings.isEnabled() || settings.getUrl().isEmpty()) {
+            showWebDavSettingsDialog();
+            return;
+        }
+        
+        // 显示正在备份提示
+        AlertDialog progressDialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.backup_data)
+                .setMessage(R.string.backup_in_progress)
+                .setCancelable(false)
+                .create();
+        progressDialog.show();
+        
+        // 执行备份
+        WebDavUtils.createBackup(requireContext(), currentUserId).thenAccept(result -> {
+            requireActivity().runOnUiThread(() -> {
+                progressDialog.dismiss();
+                
+                if (result.startsWith("备份成功")) {
+                    Toast.makeText(requireContext(), R.string.backup_successful, Toast.LENGTH_SHORT).show();
+                    
+                    // 更新最后备份时间显示
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                    String formattedDate = sdf.format(new Date());
+                    binding.tvLastBackupTime.setText(getString(R.string.last_backup, formattedDate));
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.backup_failed, result), Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+    }
+    
+    /**
+     * 显示备份文件列表对话框
+     */
+    private void showBackupFilesDialog() {
+        // 检查WebDAV是否已配置
+        WebDavUtils.WebDavSettings settings = WebDavUtils.getWebDavSettings(requireContext());
+        if (!settings.isEnabled() || settings.getUrl().isEmpty()) {
+            showWebDavSettingsDialog();
+            return;
+        }
+        
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_backup_list, null);
+        RecyclerView rvBackupList = dialogView.findViewById(R.id.rv_backup_list);
+        ProgressBar progressLoading = dialogView.findViewById(R.id.progress_loading_backups);
+        TextView tvNoBackups = dialogView.findViewById(R.id.tv_no_backups);
+        
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.restore_data)
+                .setView(dialogView)
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        
+        // 设置RecyclerView
+        rvBackupList.setLayoutManager(new LinearLayoutManager(requireContext()));
+        backupFileAdapter = new BackupFileAdapter(backupFile -> onBackupFileClick(backupFile));
+        rvBackupList.setAdapter(backupFileAdapter);
+        
+        // 加载备份文件列表
+        WebDavUtils.getBackupFiles(requireContext()).thenAccept(backupFiles -> {
+            requireActivity().runOnUiThread(() -> {
+                progressLoading.setVisibility(View.GONE);
+                
+                if (backupFiles.isEmpty()) {
+                    tvNoBackups.setVisibility(View.VISIBLE);
+                } else {
+                    rvBackupList.setVisibility(View.VISIBLE);
+                    backupFileAdapter.setBackupFiles(backupFiles);
+                }
+            });
+        });
+        
+        dialog.show();
+    }
+    
+    public void onBackupFileClick(WebDavUtils.BackupFileInfo backupFile) {
+        // 确认恢复对话框
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.confirm_restore)
+                .setMessage(R.string.confirm_restore_message)
+                .setPositiveButton(R.string.confirm, (dialog, which) -> {
+                    restoreBackup(backupFile.getFileUrl());
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+    
+    /**
+     * 从WebDAV恢复备份
+     */
+    private void restoreBackup(String fileUrl) {
+        // 显示正在恢复提示
+        AlertDialog progressDialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.restore_data)
+                .setMessage(R.string.restore_in_progress)
+                .setCancelable(false)
+                .create();
+        progressDialog.show();
+        
+        // 执行恢复
+        WebDavUtils.restoreBackup(requireContext(), fileUrl).thenAccept(result -> {
+            requireActivity().runOnUiThread(() -> {
+                progressDialog.dismiss();
+                
+                if (result.startsWith("恢复成功")) {
+                    Toast.makeText(requireContext(), R.string.restore_successful, Toast.LENGTH_SHORT).show();
+                    
+                    // 更新UI，需要重新登录
+                    showLogoutAfterRestoreDialog();
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.restore_failed, result), Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+    }
+    
+    /**
+     * 恢复后需要重新登录的对话框
+     */
+    private void showLogoutAfterRestoreDialog() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.restore_successful)
+                .setMessage(R.string.logout_confirm_message)
+                .setPositiveButton(R.string.confirm, (dialog, which) -> {
+                    // 清除登录状态
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean("is_logged_in", false);
+                    editor.apply();
+                    
+                    // 跳转到登录页
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                })
+                .setCancelable(false)
+                .show();
+    }
+    
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
         executor.shutdown();
+    }
+    
+    /**
+     * 备份文件列表适配器
+     */
+    public static class BackupFileAdapter extends RecyclerView.Adapter<BackupFileAdapter.ViewHolder> {
+        
+        private List<WebDavUtils.BackupFileInfo> backupFiles;
+        private final OnBackupFileClickListener listener;
+        
+        public BackupFileAdapter(OnBackupFileClickListener listener) {
+            this.listener = listener;
+        }
+        
+        public void setBackupFiles(List<WebDavUtils.BackupFileInfo> backupFiles) {
+            this.backupFiles = backupFiles;
+            notifyDataSetChanged();
+        }
+        
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_backup_file, parent, false);
+            return new ViewHolder(view);
+        }
+        
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            WebDavUtils.BackupFileInfo backupFile = backupFiles.get(position);
+            holder.bind(backupFile, listener);
+        }
+        
+        @Override
+        public int getItemCount() {
+            return backupFiles == null ? 0 : backupFiles.size();
+        }
+        
+        static class ViewHolder extends RecyclerView.ViewHolder {
+            private final TextView tvBackupName;
+            private final TextView tvBackupDate;
+            private final TextView tvBackupSize;
+            
+            public ViewHolder(@NonNull View itemView) {
+                super(itemView);
+                tvBackupName = itemView.findViewById(R.id.tv_backup_name);
+                tvBackupDate = itemView.findViewById(R.id.tv_backup_date);
+                tvBackupSize = itemView.findViewById(R.id.tv_backup_size);
+            }
+            
+            public void bind(WebDavUtils.BackupFileInfo backupFile, OnBackupFileClickListener listener) {
+                tvBackupName.setText(backupFile.getFileName());
+                
+                // 格式化日期
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                String dateStr = sdf.format(backupFile.getLastModified());
+                tvBackupDate.setText(itemView.getContext().getString(R.string.backup_date, dateStr));
+                
+                // 格式化文件大小
+                String sizeStr = formatFileSize(backupFile.getFileSize());
+                tvBackupSize.setText(itemView.getContext().getString(R.string.backup_size, sizeStr));
+                
+                itemView.setOnClickListener(v -> listener.onBackupFileClick(backupFile));
+            }
+            
+            private String formatFileSize(long size) {
+                if (size < 1024) {
+                    return size + " B";
+                } else if (size < 1024 * 1024) {
+                    return String.format(Locale.getDefault(), "%.1f KB", size / 1024.0);
+                } else {
+                    return String.format(Locale.getDefault(), "%.1f MB", size / (1024.0 * 1024));
+                }
+            }
+        }
+        
+        public interface OnBackupFileClickListener {
+            void onBackupFileClick(WebDavUtils.BackupFileInfo backupFile);
+        }
     }
 } 

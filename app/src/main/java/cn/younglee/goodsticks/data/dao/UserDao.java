@@ -34,6 +34,12 @@ public interface UserDao {
     @Query("SELECT * FROM users WHERE id = :userId")
     LiveData<User> getUserById(long userId);
     
+    @Query("SELECT * FROM users WHERE id = :userId")
+    User getUserByIdSync(long userId);
+    
+    @Query("SELECT id FROM users WHERE username = :username")
+    long getUserIdByUsername(String username);
+    
     @Query("SELECT COUNT(*) FROM users")
     int getUserCount();
 } 

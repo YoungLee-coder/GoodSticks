@@ -31,8 +31,14 @@ public interface NoteDao {
     @Query("SELECT * FROM notes WHERE user_id = :userId ORDER BY is_pinned DESC, modified_date DESC")
     LiveData<List<Note>> getNotesByUserId(long userId);
     
+    @Query("SELECT * FROM notes WHERE user_id = :userId ORDER BY is_pinned DESC, modified_date DESC")
+    List<Note> getNotesByUserIdSync(long userId);
+    
     @Query("SELECT * FROM notes WHERE id = :id")
     LiveData<Note> getNoteById(long id);
+    
+    @Query("SELECT * FROM notes WHERE id = :id")
+    Note getNoteByIdSync(long id);
     
     @Query("SELECT * FROM notes WHERE title LIKE '%' || :searchQuery || '%' OR content LIKE '%' || :searchQuery || '%' ORDER BY is_pinned DESC, modified_date DESC")
     LiveData<List<Note>> searchNotes(String searchQuery);
@@ -42,4 +48,7 @@ public interface NoteDao {
     
     @Query("UPDATE notes SET is_pinned = :isPinned WHERE id = :id")
     void updatePinStatus(long id, boolean isPinned);
+    
+    @Query("DELETE FROM notes WHERE user_id = :userId")
+    void deleteAllNotesByUserId(long userId);
 } 

@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 import cn.younglee.goodsticks.GoodSticksApplication;
 import cn.younglee.goodsticks.data.dao.NoteDao;
@@ -81,5 +83,48 @@ public class NoteRepository {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             noteDao.updatePinStatus(id, isPinned);
         });
+    }
+    
+    /**
+     * 同步获取用户所有笔记
+     * @param userId 用户ID
+     * @return 笔记列表
+     */
+    public List<Note> getNotesByUserIdSync(long userId) {
+        try {
+            return Executors.newSingleThreadExecutor().submit(() -> 
+                noteDao.getNotesByUserIdSync(userId)).get();
+        } catch (ExecutionException | InterruptedException e) {
+            return null;
+        }
+    }
+    
+    /**
+     * 同步方式插入笔记
+     * @param note 笔记对象
+     * @return 插入的笔记ID
+     */
+    public long insertNoteSync(Note note) {
+        try {
+            return Executors.newSingleThreadExecutor().submit(() -> 
+                noteDao.insert(note)).get();
+        } catch (ExecutionException | InterruptedException e) {
+            return 0;
+        }
+    }
+    
+    /**
+     * 同步方式删除用户所有笔记
+     * @param userId 用户ID
+     */
+    public void deleteAllNotesByUserIdSync(long userId) {
+        try {
+            Executors.newSingleThreadExecutor().submit(() -> {
+                noteDao.deleteAllNotesByUserId(userId);
+                return null;
+            }).get();
+        } catch (ExecutionException | InterruptedException e) {
+            // 处理异常
+        }
     }
 } 
