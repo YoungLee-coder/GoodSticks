@@ -584,37 +584,13 @@ public class SettingsFragment extends Fragment {
                 progressDialog.dismiss();
                 
                 if (result.startsWith("恢复成功")) {
+                    // 仅显示成功提示，不强制退出登录
                     Toast.makeText(requireContext(), R.string.restore_successful, Toast.LENGTH_SHORT).show();
-                    
-                    // 更新UI，需要重新登录
-                    showLogoutAfterRestoreDialog();
                 } else {
                     Toast.makeText(requireContext(), getString(R.string.restore_failed, result), Toast.LENGTH_LONG).show();
                 }
             });
         });
-    }
-    
-    /**
-     * 恢复后需要重新登录的对话框
-     */
-    private void showLogoutAfterRestoreDialog() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.restore_successful)
-                .setMessage(R.string.logout_confirm_message)
-                .setPositiveButton(R.string.confirm, (dialog, which) -> {
-                    // 清除登录状态
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putBoolean("is_logged_in", false);
-                    editor.apply();
-                    
-                    // 跳转到登录页
-                    Intent intent = new Intent(getActivity(), LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                })
-                .setCancelable(false)
-                .show();
     }
     
     @Override
