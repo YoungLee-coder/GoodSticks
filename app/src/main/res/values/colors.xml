@@ -4,6 +4,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     
+    <!-- APP图标颜色 -->
+    <color name="app_icon_blue">#1A42DF</color>
+    
     <!-- 主题色 -->
     <color name="blue_primary">#1140b6</color>
     <color name="blue_primary_variant">#0D2F8A</color>
