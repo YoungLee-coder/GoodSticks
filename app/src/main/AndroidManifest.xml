@@ -43,6 +43,12 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         
+        <!-- Register Activity -->
+        <activity
+            android:name=".ui.auth.RegisterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"

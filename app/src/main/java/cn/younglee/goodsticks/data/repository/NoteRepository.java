@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 
 import cn.younglee.goodsticks.data.dao.NoteDao;
-import cn.younglee.goodsticks.data.database.NoteDatabase;
+import cn.younglee.goodsticks.data.database.AppDatabase;
 import cn.younglee.goodsticks.data.entity.Note;
 
 public class NoteRepository {
@@ -15,7 +15,7 @@ public class NoteRepository {
     private final LiveData<List<Note>> allNotes;
     
     public NoteRepository(Application application) {
-        NoteDatabase db = NoteDatabase.getDatabase(application);
+        AppDatabase db = AppDatabase.getDatabase(application);
         noteDao = db.noteDao();
         allNotes = noteDao.getAllNotes();
     }
@@ -33,31 +33,31 @@ public class NoteRepository {
     }
     
     public void insert(Note note) {
-        NoteDatabase.databaseWriteExecutor.execute(() -> {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
             noteDao.insert(note);
         });
     }
     
     public void update(Note note) {
-        NoteDatabase.databaseWriteExecutor.execute(() -> {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
             noteDao.update(note);
         });
     }
     
     public void delete(Note note) {
-        NoteDatabase.databaseWriteExecutor.execute(() -> {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
             noteDao.delete(note);
         });
     }
     
     public void deleteById(long id) {
-        NoteDatabase.databaseWriteExecutor.execute(() -> {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
             noteDao.deleteById(id);
         });
     }
     
     public void updatePinStatus(long id, boolean isPinned) {
-        NoteDatabase.databaseWriteExecutor.execute(() -> {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
             noteDao.updatePinStatus(id, isPinned);
         });
     }

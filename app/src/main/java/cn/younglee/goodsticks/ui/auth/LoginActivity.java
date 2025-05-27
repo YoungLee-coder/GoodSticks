@@ -7,6 +7,8 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -14,6 +16,8 @@ import com.google.android.material.snackbar.Snackbar;
 import cn.younglee.goodsticks.GoodSticksApplication;
 import cn.younglee.goodsticks.MainActivity;
 import cn.younglee.goodsticks.R;
+import cn.younglee.goodsticks.data.entity.User;
+import cn.younglee.goodsticks.data.repository.UserRepository;
 import cn.younglee.goodsticks.databinding.ActivityLoginBinding;
 import cn.younglee.goodsticks.utils.ThemeUtils;
 
@@ -21,6 +25,19 @@ public class LoginActivity extends AppCompatActivity {
     
     private ActivityLoginBinding binding;
     private SharedPreferences prefs;
+    private UserRepository userRepository;
+    
+    private final ActivityResultLauncher<Intent> registerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    String username = result.getData().getStringExtra("username");
+                    if (username != null) {
+                        binding.etUsername.setText(username);
+                        binding.etPassword.requestFocus();
+                    }
+                }
+            });
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         
         prefs = GoodSticksApplication.getInstance().getSecureSharedPreferences();
+        userRepository = new UserRepository(getApplication());
         
         initViews();
         loadSavedCredentials();
@@ -41,8 +59,8 @@ public class LoginActivity extends AppCompatActivity {
         
         // 注册文本点击事件
         binding.tvRegister.setOnClickListener(v -> {
-            // 为演示，这里直接创建新用户
-            showRegisterDialog();
+            Intent intent = new Intent(this, RegisterActivity.class);
+            registerLauncher.launch(intent);
         });
         
         // 记住密码复选框
@@ -104,49 +122,41 @@ public class LoginActivity extends AppCompatActivity {
         binding.progressBar.setVisibility(View.VISIBLE);
         binding.btnLogin.setEnabled(false);
         
-        // 模拟登录验证（实际应用中应该连接服务器）
-        binding.getRoot().postDelayed(() -> {
-            binding.progressBar.setVisibility(View.GONE);
-            binding.btnLogin.setEnabled(true);
-            
-            // 检查保存的用户名和密码
-            String savedUsername = prefs.getString("registered_username", "admin");
-            String savedPassword = prefs.getString("registered_password", "123456");
-            
-            if (username.equals(savedUsername) && password.equals(savedPassword)) {
-                // 登录成功
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putBoolean("is_logged_in", true);
-                editor.putString("username", username);
+        userRepository.login(username, password).thenAccept(user -> {
+            runOnUiThread(() -> {
+                binding.progressBar.setVisibility(View.GONE);
+                binding.btnLogin.setEnabled(true);
                 
-                if (binding.cbRememberPassword.isChecked()) {
-                    editor.putString("password", password);
+                if (user != null) {
+                    // 登录成功
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean("is_logged_in", true);
+                    editor.putString("username", username);
+                    editor.putLong("user_id", user.getId());
+                    
+                    if (binding.cbRememberPassword.isChecked()) {
+                        editor.putString("password", password);
+                    } else {
+                        editor.remove("password");
+                    }
+                    editor.apply();
+                    
+                    // 跳转到主页
+                    Intent intent = new Intent(this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
                 } else {
-                    editor.remove("password");
+                    // 登录失败
+                    Snackbar.make(binding.getRoot(), R.string.error_incorrect_password, Snackbar.LENGTH_LONG).show();
                 }
-                editor.apply();
-                
-                // 跳转到主页
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                // 登录失败
+            });
+        }).exceptionally(throwable -> {
+            runOnUiThread(() -> {
+                binding.progressBar.setVisibility(View.GONE);
+                binding.btnLogin.setEnabled(true);
                 Snackbar.make(binding.getRoot(), R.string.error_incorrect_password, Snackbar.LENGTH_LONG).show();
-            }
-        }, 1000);
-    }
-    
-    private void showRegisterDialog() {
-        // 简单的注册逻辑，实际应用中应该有完整的注册流程
-        binding.etUsername.setText("admin");
-        binding.etPassword.setText("123456");
-        
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("registered_username", "admin");
-        editor.putString("registered_password", "123456");
-        editor.apply();
-        
-        Toast.makeText(this, "默认账号已创建\n用户名: admin\n密码: 123456", Toast.LENGTH_LONG).show();
+            });
+            return null;
+        });
     }
 } 
