@@ -11,15 +11,39 @@
 - 🌙 **深色模式**：支持明暗主题切换
 - 📌 **置顶功能**：重要笔记置顶显示
 - 🔍 **搜索功能**：快速查找笔记
+- 💾 **数据备份**：支持WebDAV备份与恢复
 
 ## 技术栈
 
 - **语言**：Java
 - **最低SDK**：24 (Android 7.0)
+- **目标SDK**：34 (Android 14)
 - **架构**：MVVM
+- **UI设计**：Material Design 3
 - **数据库**：Room
-- **图片加载**：Glide
+- **图片加载**：Glide 4.16.0
 - **安全存储**：EncryptedSharedPreferences
+- **动画效果**：Lottie 6.2.0
+- **数据同步**：WebDAV (sardine-android)
+
+## 项目结构
+
+```
+app/src/main/java/cn/younglee/goodsticks/
+├── data                    # 数据层
+│   ├── converter           # 类型转换器
+│   ├── dao                 # 数据访问对象
+│   ├── database            # 数据库定义
+│   ├── entity              # 数据实体类
+│   └── repository          # 数据仓库
+├── ui                      # 用户界面
+│   ├── auth                # 登录/注册
+│   ├── home                # 主页
+│   ├── note                # 笔记编辑
+│   ├── settings            # 设置
+│   └── splash              # 启动页
+└── utils                   # 工具类
+```
 
 ## 主题色
 
@@ -46,10 +70,12 @@
 3. **管理笔记**
    - 长按笔记可进行置顶或删除操作
    - 点击笔记进入编辑模式
+   - 搜索框可快速查找笔记内容
 
 4. **个性化设置**
    - 在设置页面可切换深色模式
    - 可选择7种不同的主题色
+   - 支持通过WebDAV备份和恢复数据
 
 ## 编译运行
 
@@ -58,13 +84,21 @@
 3. 连接Android设备或启动模拟器
 4. 点击运行按钮
 
+## 技术实现
+
+- **MVVM架构**：使用ViewModel和LiveData实现UI与数据分离
+- **Room数据库**：提供本地存储能力，支持用户数据隔离
+- **主题切换**：通过ThemeUtils实现动态主题切换
+- **安全存储**：使用EncryptedSharedPreferences加密存储敏感信息
+- **WebDAV同步**：支持将数据备份到WebDAV服务器
+
 ## 注意事项
 
 - 应用使用加密存储保护用户密码
 - 拍照功能需要相机权限
 - 选择图片需要存储权限
 - 图片存储在应用私有目录，卸载应用会删除所有数据
+- 备份恢复功能需要联网权限
 
 ## 开发者
-
-期末作业项目 - GoodSticks备忘录 
+YoungLee

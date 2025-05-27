@@ -83,6 +83,7 @@
     <string name="data_backup_restore">数据备份与恢复</string>
     <string name="webdav_settings">WebDAV设置</string>
     <string name="webdav_settings_desc">WebDAV是一种基于HTTP的协议，可以用来同步数据到您的服务器或云盘上。支持坚果云、NextCloud等服务。</string>
+    <string name="alist_webdav_tips">注意：使用AList作为WebDAV服务器时，请确保：\n1. 文件夹路径已在AList中存在，应用无法自动创建目录\n2. 账户具有读写权限\n3. 路径格式正确，例如：/云盘名称/备份目录/</string>
     <string name="enable_webdav">启用WebDAV</string>
     <string name="webdav_server_url">服务器地址</string>
     <string name="webdav_folder_path">文件夹路径</string>

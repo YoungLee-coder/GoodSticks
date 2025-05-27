@@ -106,6 +106,18 @@
             android:text="/GoodSticks/" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- AList使用提示 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/alist_webdav_tips"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="12sp"
+        android:background="@drawable/bg_rounded_light_gray"
+        android:padding="8dp" />
+
     <!-- 测试连接按钮 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_test_connection"

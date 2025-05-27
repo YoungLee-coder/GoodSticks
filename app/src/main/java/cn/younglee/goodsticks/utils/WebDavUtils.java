@@ -19,8 +19,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -95,8 +97,31 @@ public class WebDavUtils {
             try {
                 Sardine sardine = new OkHttpSardine();
                 sardine.setCredentials(username, password);
-                sardine.exists(url);
-                return true;
+                
+                // 首先尝试exists方法
+                try {
+                    sardine.exists(url);
+                    return true;
+                } catch (Exception e) {
+                    Log.w(TAG, "WebDAV exists方法失败，尝试list方法: " + e.getMessage());
+                    
+                    // 如果exists方法失败，尝试list方法
+                    try {
+                        sardine.list(url);
+                        return true;
+                    } catch (Exception e2) {
+                        Log.w(TAG, "WebDAV list方法失败，尝试head方法: " + e2.getMessage());
+                        
+                        // 最后尝试一个简单的head请求
+                        try {
+                            sardine.exists(url);
+                            return true;
+                        } catch (Exception e3) {
+                            Log.e(TAG, "WebDAV所有连接测试方法都失败", e3);
+                            return false;
+                        }
+                    }
+                }
             } catch (Exception e) {
                 Log.e(TAG, "WebDAV连接测试失败", e);
                 return false;
@@ -111,6 +136,12 @@ public class WebDavUtils {
         WebDavSettings settings = getWebDavSettings(context);
         Sardine sardine = new OkHttpSardine();
         sardine.setCredentials(settings.getUsername(), settings.getPassword());
+        
+        // 记录WebDAV连接信息（不包含密码）以便排查问题
+        Log.d(TAG, "WebDAV URL: " + settings.getUrl());
+        Log.d(TAG, "WebDAV Username: " + settings.getUsername());
+        Log.d(TAG, "WebDAV Folder: " + settings.getFolder());
+        
         return sardine;
     }
 
@@ -118,8 +149,18 @@ public class WebDavUtils {
      * 确保WebDAV文件夹存在
      */
     private static void ensureDirectoryExists(Sardine sardine, String url) throws IOException {
-        if (!sardine.exists(url)) {
-            sardine.createDirectory(url);
+        try {
+            if (!sardine.exists(url)) {
+                try {
+                    sardine.createDirectory(url);
+                } catch (Exception e) {
+                    Log.w(TAG, "无法创建目录，将尝试直接上传: " + e.getMessage());
+                    // 忽略目录创建错误，尝试直接上传文件
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "检查目录存在性失败，将尝试直接上传: " + e.getMessage());
+            // 忽略目录检查错误，尝试直接上传文件
         }
     }
 
@@ -181,7 +222,15 @@ public class WebDavUtils {
                 }
                 
                 String webDavFolderUrl = baseUrl + (folder.startsWith("/") ? folder.substring(1) : folder);
-                ensureDirectoryExists(sardine, webDavFolderUrl);
+                Log.d(TAG, "尝试访问的WebDAV完整URL: " + webDavFolderUrl);
+                
+                try {
+                    // 尝试确保目录存在，但即使失败也继续
+                    ensureDirectoryExists(sardine, webDavFolderUrl);
+                } catch (Exception e) {
+                    Log.w(TAG, "确保目录存在时出错，将尝试直接上传: " + e.getMessage());
+                    // 忽略目录错误，继续尝试上传
+                }
                 
                 // 生成备份文件名，使用时间戳
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
@@ -189,14 +238,26 @@ public class WebDavUtils {
                 String fileName = String.format(BACKUP_FILE_NAME_FORMAT, timestamp);
                 String fileUrl = webDavFolderUrl + fileName;
                 
-                // 上传备份文件
-                byte[] data = jsonData.getBytes(StandardCharsets.UTF_8);
-                sardine.put(fileUrl, data);
+                Log.d(TAG, "尝试上传到: " + fileUrl);
                 
-                // 更新最后备份时间
-                updateLastBackupTime(context, timestamp);
-                
-                return "备份成功: " + fileName;
+                // 使用try-catch专门处理上传操作
+                try {
+                    // 上传备份文件
+                    byte[] data = jsonData.getBytes(StandardCharsets.UTF_8);
+                    
+                    // 指定Content-Type为application/json
+                    String contentType = "application/json";
+                    
+                    sardine.put(fileUrl, data, contentType);
+                    
+                    // 更新最后备份时间
+                    updateLastBackupTime(context, timestamp);
+                    
+                    return "备份成功: " + fileName;
+                } catch (Exception e) {
+                    Log.e(TAG, "文件上传失败: " + e.getMessage(), e);
+                    return "文件上传失败: " + e.getMessage();
+                }
             } catch (Exception e) {
                 Log.e(TAG, "创建备份失败", e);
                 return "备份失败: " + e.getMessage();
@@ -232,23 +293,36 @@ public class WebDavUtils {
                 
                 String webDavFolderUrl = baseUrl + (folder.startsWith("/") ? folder.substring(1) : folder);
                 
-                // 检查目录是否存在
-                if (!sardine.exists(webDavFolderUrl)) {
-                    return backupFiles;
-                }
-                
-                // 获取目录中的所有文件
-                List<DavResource> resources = sardine.list(webDavFolderUrl);
-                for (DavResource resource : resources) {
-                    if (!resource.isDirectory() && resource.getName().startsWith("goodsticks_backup_") 
-                            && resource.getName().endsWith(".json")) {
-                        BackupFileInfo fileInfo = new BackupFileInfo();
-                        fileInfo.setFileName(resource.getName());
-                        fileInfo.setFileSize(resource.getContentLength());
-                        fileInfo.setLastModified(resource.getModified());
-                        fileInfo.setFileUrl(webDavFolderUrl + resource.getName());
-                        backupFiles.add(fileInfo);
+                try {
+                    // 检查目录是否存在
+                    boolean exists = false;
+                    try {
+                        exists = sardine.exists(webDavFolderUrl);
+                    } catch (Exception e) {
+                        Log.w(TAG, "检查目录存在性失败，将尝试直接列出文件: " + e.getMessage());
+                        // 即使检查目录失败，也尝试列出文件
+                        exists = true;
                     }
+                    
+                    if (!exists) {
+                        return backupFiles;
+                    }
+                    
+                    // 获取目录中的所有文件
+                    List<DavResource> resources = sardine.list(webDavFolderUrl);
+                    for (DavResource resource : resources) {
+                        if (!resource.isDirectory() && resource.getName().startsWith("goodsticks_backup_") 
+                                && resource.getName().endsWith(".json")) {
+                            BackupFileInfo fileInfo = new BackupFileInfo();
+                            fileInfo.setFileName(resource.getName());
+                            fileInfo.setFileSize(resource.getContentLength());
+                            fileInfo.setLastModified(resource.getModified());
+                            fileInfo.setFileUrl(webDavFolderUrl + resource.getName());
+                            backupFiles.add(fileInfo);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "获取WebDAV文件列表失败: " + e.getMessage(), e);
                 }
                 
             } catch (Exception e) {
