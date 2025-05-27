@@ -28,14 +28,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import cn.younglee.goodsticks.GoodSticksApplication;
 import cn.younglee.goodsticks.R;
+import cn.younglee.goodsticks.data.entity.User;
+import cn.younglee.goodsticks.data.repository.UserRepository;
 import cn.younglee.goodsticks.databinding.FragmentSettingsBinding;
 import cn.younglee.goodsticks.ui.auth.LoginActivity;
 import cn.younglee.goodsticks.utils.ThemeUtils;
@@ -47,6 +52,8 @@ public class SettingsFragment extends Fragment {
     private Uri photoUri;
     private ImageView currentAvatarImageView;
     private long currentUserId;
+    private UserRepository userRepository;
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
     
     // 拍照启动器
     private final ActivityResultLauncher<Uri> takePictureLauncher = registerForActivityResult(
@@ -90,6 +97,7 @@ public class SettingsFragment extends Fragment {
         
         prefs = GoodSticksApplication.getInstance().getSecureSharedPreferences();
         currentUserId = prefs.getLong("user_id", 0);
+        userRepository = new UserRepository(requireActivity().getApplication());
         
         setupViews();
         loadSettings();
@@ -217,13 +225,41 @@ public class SettingsFragment extends Fragment {
                 .setPositiveButton(R.string.save, (dialog, which) -> {
                     String newUsername = etUsername.getText().toString().trim();
                     if (!TextUtils.isEmpty(newUsername)) {
-                        prefs.edit().putString("username", newUsername).apply();
-                        binding.tvUsername.setText(newUsername);
-                        Toast.makeText(getContext(), R.string.profile_updated, Toast.LENGTH_SHORT).show();
+                        String oldUsername = prefs.getString("username", "");
+                        if (!newUsername.equals(oldUsername)) {
+                            // 检查新用户名是否已存在
+                            boolean usernameExists = userRepository.isUsernameExists(newUsername);
+                            if (usernameExists) {
+                                Toast.makeText(getContext(), R.string.username_already_exists, Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            
+                            // 更新SharedPreferences
+                            prefs.edit().putString("username", newUsername).apply();
+                            
+                            // 更新数据库中的用户信息
+                            updateUserInDatabase(newUsername);
+                            
+                            // 更新UI
+                            binding.tvUsername.setText(newUsername);
+                            Toast.makeText(getContext(), R.string.profile_updated, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
+    }
+    
+    private void updateUserInDatabase(String newUsername) {
+        LiveData<User> userLiveData = userRepository.getUserById(currentUserId);
+        userLiveData.observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                user.setUsername(newUsername);
+                user.setUpdatedAt(System.currentTimeMillis());
+                userRepository.updateUser(user);
+                userLiveData.removeObservers(getViewLifecycleOwner());
+            }
+        });
     }
     
     private void showAvatarOptions() {
@@ -317,5 +353,6 @@ public class SettingsFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        executor.shutdown();
     }
 } 

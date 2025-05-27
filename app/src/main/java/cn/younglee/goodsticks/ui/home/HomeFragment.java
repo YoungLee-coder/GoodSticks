@@ -10,11 +10,13 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import cn.younglee.goodsticks.R;
 import cn.younglee.goodsticks.databinding.FragmentHomeBinding;
 import cn.younglee.goodsticks.ui.note.EditNoteActivity;
 import cn.younglee.goodsticks.ui.note.NoteAdapter;
@@ -71,7 +73,7 @@ public class HomeFragment extends Fragment {
     
     private void setupFab() {
         binding.fabAddNote.setOnClickListener(v -> {
-            // 创建新笔记
+            // 创建新备忘录
             Intent intent = new Intent(getActivity(), EditNoteActivity.class);
             startActivity(intent);
         });
@@ -118,35 +120,13 @@ public class HomeFragment extends Fragment {
     }
     
     private void showNoteOptionsDialog(long noteId) {
-        String[] options = {"置顶/取消置顶", "删除"};
-        
-        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                .setTitle("选择操作")
-                .setItems(options, (dialog, which) -> {
-                    if (which == 0) {
-                        // 切换置顶状态
-                        noteViewModel.getAllNotes().observe(getViewLifecycleOwner(), notes -> {
-                            if (notes != null) {
-                                for (cn.younglee.goodsticks.data.entity.Note note : notes) {
-                                    if (note.getId() == noteId) {
-                                        noteViewModel.updatePinStatus(noteId, !note.isPinned());
-                                        break;
-                                    }
-                                }
-                            }
-                        });
-                    } else if (which == 1) {
-                        // 删除确认
-                        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                                .setTitle("删除笔记")
-                                .setMessage("确定要删除这条笔记吗？")
-                                .setPositiveButton("删除", (dialog2, which2) -> {
-                                    noteViewModel.deleteById(noteId);
-                                })
-                                .setNegativeButton("取消", null)
-                                .show();
-                    }
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.delete_note)
+                .setMessage(R.string.delete_note_confirm)
+                .setPositiveButton(R.string.delete, (dialog, which) -> {
+                    noteViewModel.deleteById(noteId);
                 })
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
     
