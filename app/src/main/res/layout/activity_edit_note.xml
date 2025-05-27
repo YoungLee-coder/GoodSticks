@@ -110,7 +110,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
+        android:contentDescription="@string/add_image"
+        app:fabSize="normal"
+        app:elevation="6dp"
         android:src="@drawable/ic_camera"
-        app:backgroundTint="?attr/colorSecondary" />
+        app:backgroundTint="?attr/colorPrimary"
+        app:tint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 
