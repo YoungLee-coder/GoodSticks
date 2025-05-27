@@ -46,6 +46,7 @@ public class SettingsFragment extends Fragment {
     private SharedPreferences prefs;
     private Uri photoUri;
     private ImageView currentAvatarImageView;
+    private long currentUserId;
     
     // 拍照启动器
     private final ActivityResultLauncher<Uri> takePictureLauncher = registerForActivityResult(
@@ -88,6 +89,7 @@ public class SettingsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         
         prefs = GoodSticksApplication.getInstance().getSecureSharedPreferences();
+        currentUserId = prefs.getLong("user_id", 0);
         
         setupViews();
         loadSettings();
@@ -173,6 +175,7 @@ public class SettingsFragment extends Fragment {
                     editor.putBoolean("is_logged_in", false);
                     editor.putBoolean("remember_password", false);
                     editor.remove("password");
+                    // 不删除头像数据，让每个用户保留自己的头像
                     editor.apply();
                     
                     // 跳转到登录页
@@ -194,7 +197,8 @@ public class SettingsFragment extends Fragment {
         etUsername.setText(currentUsername);
         
         // 加载当前头像到对话框
-        String avatarBase64 = prefs.getString("avatar", "");
+        String avatarKey = "avatar_" + currentUserId;
+        String avatarBase64 = prefs.getString(avatarKey, "");
         if (!TextUtils.isEmpty(avatarBase64)) {
             byte[] decodedBytes = Base64.decode(avatarBase64, Base64.DEFAULT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
@@ -278,8 +282,9 @@ public class SettingsFragment extends Fragment {
             byte[] bytes = baos.toByteArray();
             String base64 = Base64.encodeToString(bytes, Base64.DEFAULT);
             
-            // 保存到SharedPreferences
-            prefs.edit().putString("avatar", base64).apply();
+            // 保存到SharedPreferences，使用用户ID区分
+            String avatarKey = "avatar_" + currentUserId;
+            prefs.edit().putString(avatarKey, base64).apply();
             
             // 更新UI
             if (currentAvatarImageView != null) {
@@ -297,7 +302,9 @@ public class SettingsFragment extends Fragment {
     }
     
     private void loadAvatar() {
-        String avatarBase64 = prefs.getString("avatar", "");
+        // 使用用户ID获取对应的头像
+        String avatarKey = "avatar_" + currentUserId;
+        String avatarBase64 = prefs.getString(avatarKey, "");
         if (!TextUtils.isEmpty(avatarBase64)) {
             byte[] decodedBytes = Base64.decode(avatarBase64, Base64.DEFAULT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
