@@ -146,6 +146,9 @@ public class SettingsFragment extends Fragment {
         // 关于
         binding.layoutAbout.setOnClickListener(v -> showAboutDialog());
         
+        // 仓库信息
+        binding.layoutRepository.setOnClickListener(v -> openRepository());
+        
         // 退出登录
         binding.btnLogout.setOnClickListener(v -> showLogoutConfirmDialog());
     }
@@ -211,6 +214,16 @@ public class SettingsFragment extends Fragment {
                 .setMessage(R.string.about_message)
                 .setPositiveButton(R.string.ok, null)
                 .show();
+    }
+    
+    private void openRepository() {
+        try {
+            String repositoryUrl = getString(R.string.repository_url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(repositoryUrl));
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(getContext(), R.string.cannot_open_browser, Toast.LENGTH_SHORT).show();
+        }
     }
     
     private void showLogoutConfirmDialog() {

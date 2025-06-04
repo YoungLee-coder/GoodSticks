@@ -65,7 +65,7 @@
     <string name="select_theme_color">选择主题颜色</string>
     <string name="about_info">关于</string>
     <string name="about">关于应用</string>
-    <string name="about_message">GoodSticks 备忘录\n版本 1.0\n\n一个简洁优雅的备忘录应用，帮助您记录生活中的美好时刻。</string>
+    <string name="about_message">GoodSticks 备忘录\n版本 1.0.1\n\n一个简洁优雅的备忘录应用，帮助您记录生活中的美好时刻。</string>
     <string name="logout">退出登录</string>
     <string name="logout_confirm_message">确定要退出登录吗？</string>
     <string name="confirm">确定</string>
@@ -109,4 +109,11 @@
     <string name="loading_backups">加载备份列表...</string>
     <string name="backup_size">大小: %s</string>
     <string name="backup_date">日期: %s</string>
+    
+    <!-- 仓库信息相关 -->
+    <string name="repository_info">仓库信息</string>
+    <string name="view_on_github">在 GitHub 上查看</string>
+    <string name="repository_url">https://github.com/YoungLee-coder/GoodSticks</string>
+    <string name="open_repository">打开仓库</string>
+    <string name="cannot_open_browser">无法打开浏览器</string>
 </resources>
