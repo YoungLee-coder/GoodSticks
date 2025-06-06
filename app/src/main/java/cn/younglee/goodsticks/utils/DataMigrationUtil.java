@@ -15,7 +15,7 @@ public class DataMigrationUtil {
     private static final String MIGRATION_DONE_KEY = "migration_1_2_done";
     
     /**
-     * 将无用户ID的备忘录关联到当前登录用户
+     * 将无用户ID的记事本关联到当前登录用户
      */
     public static void migrateNotesToCurrentUser(Context context) {
         SharedPreferences prefs = GoodSticksApplication.getInstance().getSecureSharedPreferences();
@@ -49,9 +49,9 @@ public class DataMigrationUtil {
                 // 标记迁移已完成
                 prefs.edit().putBoolean(MIGRATION_DONE_KEY, true).apply();
                 
-                Log.i(TAG, "备忘录数据迁移完成，关联到用户ID: " + userId);
-            } catch (Exception e) {
-                Log.e(TAG, "备忘录数据迁移失败", e);
+                            Log.i(TAG, "记事本数据迁移完成，关联到用户ID: " + userId);
+        } catch (Exception e) {
+            Log.e(TAG, "记事本数据迁移失败", e);
             }
         });
     }

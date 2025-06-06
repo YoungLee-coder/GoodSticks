@@ -33,19 +33,19 @@
     <string name="navigation_settings">设置</string>
     
     <!-- 首页相关 -->
-    <string name="search_notes">搜索备忘录</string>
-    <string name="no_notes">暂无备忘录</string>
-    <string name="tap_to_create">点击右下角按钮创建备忘录</string>
-    <string name="new_note">新建备忘录</string>
+    <string name="search_notes">搜索记事本</string>
+    <string name="no_notes">暂无记事本</string>
+    <string name="tap_to_create">点击右下角按钮创建记事本</string>
+    <string name="new_note">新建记事本</string>
     
     <!-- 编辑笔记相关 -->
-    <string name="edit_note">编辑备忘录</string>
+    <string name="edit_note">编辑记事本</string>
     <string name="note_title_hint">标题</string>
     <string name="note_content_hint">在这里记录...</string>
     <string name="note_empty_warning">请输入标题或内容</string>
     <string name="note_saved">保存成功</string>
-    <string name="delete_note">删除备忘录</string>
-    <string name="delete_note_confirm">确定要删除这条备忘录吗？</string>
+    <string name="delete_note">删除记事本</string>
+    <string name="delete_note_confirm">确定要删除这条记事本吗？</string>
     <string name="delete">删除</string>
     <string name="cancel">取消</string>
     <string name="save">保存</string>
@@ -65,7 +65,7 @@
     <string name="select_theme_color">选择主题颜色</string>
     <string name="about_info">关于</string>
     <string name="about">关于应用</string>
-    <string name="about_message">GoodSticks 备忘录\n版本 1.0.1\n\n一个简洁优雅的备忘录应用，帮助您记录生活中的美好时刻。</string>
+    <string name="about_message">GoodSticks 记事本\n版本 1.0.1\n\n一个简洁优雅的记事本应用，帮助您记录生活中的美好时刻。</string>
     <string name="logout">退出登录</string>
     <string name="logout_confirm_message">确定要退出登录吗？</string>
     <string name="confirm">确定</string>

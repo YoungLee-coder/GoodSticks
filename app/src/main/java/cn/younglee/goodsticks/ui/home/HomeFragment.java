@@ -73,7 +73,7 @@ public class HomeFragment extends Fragment {
     
     private void setupFab() {
         binding.fabAddNote.setOnClickListener(v -> {
-            // 创建新备忘录
+            // 创建新记事本
             Intent intent = new Intent(getActivity(), EditNoteActivity.class);
             startActivity(intent);
         });

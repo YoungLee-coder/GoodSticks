@@ -1,6 +1,6 @@
-# GoodSticks - 备忘录应用
+# GoodSticks - 记事本应用
 
-一个简洁优雅的Android备忘录应用，采用Material Design 3设计规范，界面类似iOS风格。
+一个简洁优雅的Android记事本应用，采用Material Design 3设计规范，界面类似iOS风格。
 
 ## 功能特性
 
